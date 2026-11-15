@@ -3,288 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHIELD-IoT // Autonomous Security Monitoring & IDS</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Enterprise IoT Security Console // SOC IDS-Engine</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --bg-base: #0c1017;
+            --bg-surface: #141a24;
+            --bg-elevated: #1b2331;
+            --border-subtle: #242f42;
+            --border-strong: #334155;
+            --text-primary: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0b0f19;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
         }
+
         .font-mono {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'IBM Plex Mono', monospace;
         }
-        .cyber-card {
-            background: linear-gradient(145deg, rgba(17, 24, 39, 0.95), rgba(15, 23, 42, 0.95));
-            border: 1px solid rgba(55, 65, 81, 0.5);
-            backdrop-filter: blur(10px);
+
+        .data-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
         }
-        .cyber-card:hover {
-            border-color: rgba(59, 130, 246, 0.4);
+
+        .data-card:hover {
+            border-color: var(--border-strong);
         }
-        .glow-red {
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.35);
-        }
-        .glow-green {
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
-        }
-        .glow-cyan {
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
-        }
-        /* Custom scrollbar */
+
+        /* Enterprise table scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
         }
         ::-webkit-scrollbar-track {
             background: #0f172a;
         }
         ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
+            background: #2b394e;
+            border-radius: 2px;
         }
     </style>
 </head>
-<body class="text-slate-100 min-h-screen pb-12">
+<body class="min-h-screen text-slate-200 antialiased flex flex-col justify-between">
 
-    <!-- Top Navigation Bar -->
-    <header class="border-b border-slate-800 bg-slate-950/80 sticky top-0 z-50 backdrop-blur-md px-6 py-3.5">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="h-10 w-10 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center glow-cyan">
-                    <i data-lucide="shield-alert" class="w-6 h-6 text-white"></i>
-                </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                            SHIELD<span class="text-cyan-400">.IoT</span>
-                            <span class="text-xs font-mono font-medium px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">IDS/IPS v2.4</span>
-                        </h1>
+    <!-- Top Utility Bar (Datadog / Cisco Style) -->
+    <header class="bg-[#111722] border-b border-[#222d3d] px-6 py-2.5 sticky top-0 z-50">
+        <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-4">
+            
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-7 h-7 bg-blue-600 rounded flex items-center justify-center font-bold text-xs text-white tracking-wider">
+                        NX
                     </div>
-                    <p class="text-xs text-slate-400">Autonomous IoT Intrusion Detection & Threat Mitigation System</p>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-white tracking-wide uppercase">Nexus-IoT Security Monitor</span>
+                            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">v2.4.0-prod</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-mono">Gateway Node: GW-NORTH-01 • Ingress DPI Active</p>
+                    </div>
+                </div>
+
+                <div class="hidden lg:flex items-center space-x-3 text-[11px] font-mono pl-4 border-l border-slate-700/60 text-slate-400">
+                    <span>Protocol: <b class="text-slate-200">MQTT/RTSP/CoAP</b></span>
+                    <span>•</span>
+                    <span>Pipeline: <b class="text-emerald-400">Zero-Drop</b></span>
+                    <span>•</span>
+                    <span>ML Model: <b class="text-slate-200">IsolationForest (k=100)</b></span>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-5">
-                <!-- Threat Level Badge -->
-                <div class="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-700">
-                    <span id="threat-indicator" class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-xs text-slate-400 font-medium">THREAT STATUS:</span>
-                    <span id="threat-level-badge" class="text-xs font-mono font-bold text-emerald-400">NORMAL</span>
+            <div class="flex items-center space-x-4">
+                <!-- Threat Pill -->
+                <div class="flex items-center space-x-2 px-3 py-1 rounded bg-[#0b0e14] border border-slate-800">
+                    <span class="text-[11px] font-medium text-slate-400">STATE:</span>
+                    <span id="threat-indicator" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span id="threat-level-badge" class="text-xs font-mono font-bold text-emerald-400">NOMINAL</span>
                 </div>
 
-                <!-- Live WebSocket status -->
-                <div class="flex items-center space-x-1.5 text-xs text-slate-400 font-mono">
+                <!-- Feed Status -->
+                <div class="flex items-center space-x-2 text-[11px] font-mono text-slate-400 bg-[#0b0e14] px-2.5 py-1 rounded border border-slate-800">
                     <span id="ws-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span id="ws-status">LIVE FEED</span>
+                    <span id="ws-status">LIVE SYNC</span>
                 </div>
             </div>
+
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-6 pt-6 space-y-6">
+    <!-- Main Workspace -->
+    <main class="max-w-[1600px] mx-auto w-full px-6 py-5 flex-1 space-y-5">
 
-        <!-- Metrics Row -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <!-- Metric 1: Threat Score Gauge -->
-            <div class="cyber-card p-4 rounded-xl">
-                <div class="flex justify-between items-start">
-                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Threat Index</span>
-                    <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+        <!-- KPI Header Strip -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+            <div class="data-card p-3.5 rounded-lg">
+                <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Threat Index Score</div>
+                <div class="mt-1 flex items-baseline justify-between">
+                    <span id="threat-score" class="text-2xl font-bold font-mono text-white">5</span>
+                    <span class="text-[11px] font-mono text-slate-400">Baseline Max: 100</span>
                 </div>
-                <div class="mt-2 flex items-baseline space-x-2">
-                    <span id="threat-score" class="text-3xl font-bold font-mono text-white">5</span>
-                    <span class="text-xs text-slate-400">/ 100</span>
-                </div>
-                <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
-                    <div id="threat-score-bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 5%"></div>
+                <div class="w-full bg-slate-800 h-1 rounded-sm mt-2.5 overflow-hidden">
+                    <div id="threat-score-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 5%"></div>
                 </div>
             </div>
 
-            <!-- Metric 2: Packets Monitored -->
-            <div class="cyber-card p-4 rounded-xl">
-                <div class="flex justify-between items-start">
-                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Packets Processed</span>
-                    <i data-lucide="cpu" class="w-4 h-4 text-blue-400"></i>
+            <div class="data-card p-3.5 rounded-lg">
+                <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Processed Packets</div>
+                <div class="mt-1 flex items-baseline justify-between">
+                    <span id="metric-total-pkts" class="text-2xl font-bold font-mono text-white">0</span>
+                    <span class="text-[11px] font-mono text-slate-400">Inspected</span>
                 </div>
-                <div class="mt-2 flex items-baseline space-x-2">
-                    <span id="metric-total-pkts" class="text-3xl font-bold font-mono text-white">0</span>
-                    <span class="text-xs text-slate-400">pkts</span>
-                </div>
-                <p class="text-xs text-slate-500 mt-2 flex items-center gap-1">
-                    <i data-lucide="check-circle" class="w-3 h-3 text-emerald-400"></i> Deep Packet Inspection Active
-                </p>
+                <div class="text-[10px] text-slate-500 font-mono mt-2">DPI Layer 3/4/7 Checksum Verified</div>
             </div>
 
-            <!-- Metric 3: Live Rate -->
-            <div class="cyber-card p-4 rounded-xl">
-                <div class="flex justify-between items-start">
-                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Network Throughput</span>
-                    <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
-                </div>
-                <div class="mt-2 flex items-baseline space-x-2">
-                    <span id="metric-rate" class="text-3xl font-bold font-mono text-white">0.0</span>
-                    <span class="text-xs text-slate-400">pkts/sec</span>
-                </div>
-                <p id="metric-bandwidth-desc" class="text-xs text-slate-500 mt-2">Nominal Baseline Traffic</p>
-            </div>
-
-            <!-- Metric 4: Active Threat & Quarantine -->
-            <div class="cyber-card p-4 rounded-xl">
-                <div class="flex justify-between items-start">
-                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Quarantine / Threats</span>
-                    <i data-lucide="lock" class="w-4 h-4 text-rose-400"></i>
-                </div>
-                <div class="mt-2 flex items-baseline space-x-3">
-                    <div>
-                        <span id="metric-threats" class="text-3xl font-bold font-mono text-rose-400">0</span>
-                        <span class="text-xs text-slate-400">Active</span>
+            <div class="data-card p-3.5 rounded-lg">
+                <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Ingress Throughput</div>
+                <div class="mt-1 flex items-baseline justify-between">
+                    <div class="flex items-baseline space-x-1.5">
+                        <span id="metric-rate" class="text-2xl font-bold font-mono text-white">0.0</span>
+                        <span class="text-[11px] font-mono text-slate-400">pkts/s</span>
                     </div>
-                    <span class="text-slate-600 text-xl font-light">|</span>
-                    <div>
-                        <span id="metric-quarantine" class="text-2xl font-bold font-mono text-amber-400">0</span>
+                    <span id="metric-kbps" class="text-[11px] font-mono text-blue-400">-- KB/s</span>
+                </div>
+                <div class="text-[10px] text-slate-500 font-mono mt-2">Nominal Ingress Threshold: 35.0 p/s</div>
+            </div>
+
+            <div class="data-card p-3.5 rounded-lg">
+                <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Quarantine & Incident Count</div>
+                <div class="mt-1 flex items-baseline justify-between">
+                    <div class="flex items-baseline space-x-2 font-mono">
+                        <span id="metric-threats" class="text-2xl font-bold text-amber-400">0</span>
+                        <span class="text-xs text-slate-400">Active</span>
+                        <span class="text-slate-600">/</span>
+                        <span id="metric-quarantine" class="text-2xl font-bold text-rose-400">0</span>
                         <span class="text-xs text-slate-400">Isolated</span>
                     </div>
                 </div>
-                <p class="text-xs text-slate-500 mt-2">Zero-Trust Network Isolation</p>
+                <div class="text-[10px] text-slate-500 font-mono mt-2">Automated Policy Enforcement: Enabled</div>
             </div>
         </div>
 
-        <!-- 2-Column Main Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 2-Panel Core Architecture (Dense & Data-Rich) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-            <!-- Left Column: Charts + Devices Fleet (7 cols) -->
-            <div class="lg:col-span-7 space-y-6">
-
-                <!-- Real-time Traffic Chart -->
-                <div class="cyber-card p-5 rounded-xl">
-                    <div class="flex items-center justify-between mb-4">
+            <!-- Left Console: Telemetry Graph + Fleet Table (7 Cols) -->
+            <div class="lg:col-span-7 space-y-5">
+                
+                <!-- Telemetry Graph (Clean Datadog styling) -->
+                <div class="data-card rounded-lg p-4">
+                    <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-800">
                         <div class="flex items-center space-x-2">
-                            <i data-lucide="line-chart" class="w-4 h-4 text-cyan-400"></i>
-                            <h2 class="text-sm font-semibold text-white uppercase tracking-wider">Real-Time Traffic & Anomaly Rate</h2>
+                            <span class="w-2 h-2 bg-blue-500 rounded-sm"></span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-200">Network Telemetry & IsolationForest Anomaly Variance</span>
                         </div>
-                        <span class="text-xs font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">Rolling 30s Window</span>
+                        <span class="text-[11px] font-mono text-slate-400">Sample Interval: 1.0s (Window: 30s)</span>
                     </div>
-                    <div class="h-56 w-full">
+                    <div class="h-52 w-full">
                         <canvas id="trafficChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Monitored IoT Device Fleet -->
-                <div class="cyber-card p-5 rounded-xl">
-                    <div class="flex items-center justify-between mb-4">
+                <!-- IoT Device Inventory Table -->
+                <div class="data-card rounded-lg p-4">
+                    <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
                         <div class="flex items-center space-x-2">
-                            <i data-lucide="network" class="w-4 h-4 text-blue-400"></i>
-                            <h2 class="text-sm font-semibold text-white uppercase tracking-wider">Monitored IoT Fleet (5 Devices)</h2>
+                            <span class="w-2 h-2 bg-emerald-500 rounded-sm"></span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-200">Monitored Ingress Fleet (Asset Inventory)</span>
                         </div>
-                        <span class="text-xs text-slate-400 font-mono">Live Ingress Gateway</span>
+                        <span class="text-[11px] font-mono text-slate-400">5 Managed Nodes</span>
                     </div>
 
-                    <div id="devices-container" class="space-y-3">
-                        <!-- Devices injected dynamically by JS -->
-                        <div class="text-xs text-slate-500 text-center py-6">Connecting to IoT Device Gateway...</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                                    <th class="py-2 px-2.5">Node ID</th>
+                                    <th class="py-2 px-2.5">Device Type</th>
+                                    <th class="py-2 px-2.5">IPv4 / MAC</th>
+                                    <th class="py-2 px-2.5">Protocol</th>
+                                    <th class="py-2 px-2.5 text-right">Throughput</th>
+                                    <th class="py-2 px-2.5 text-right">Anomaly %</th>
+                                    <th class="py-2 px-2.5 text-center">Status</th>
+                                    <th class="py-2 px-2.5 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="devices-table-body" class="divide-y divide-slate-800/60 font-mono text-[11px]">
+                                <tr>
+                                    <td colspan="8" class="text-center py-6 text-slate-500">Initializing node discovery...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+
             </div>
 
-            <!-- Right Column: Attack Control Center + Threat Incident Logs (5 cols) -->
-            <div class="lg:col-span-5 space-y-6">
-
-                <!-- Attack Simulator Control Deck -->
-                <div class="cyber-card p-5 rounded-xl border-rose-950/40">
-                    <div class="flex items-center justify-between mb-3">
+            <!-- Right Console: Adversary Stress-Test Bench + Incident SIEM Log (5 Cols) -->
+            <div class="lg:col-span-5 space-y-5">
+                
+                <!-- Security Testing Bench -->
+                <div class="data-card rounded-lg p-4 border-l-4 border-l-amber-500">
+                    <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-800">
                         <div class="flex items-center space-x-2">
-                            <i data-lucide="skull" class="w-4 h-4 text-rose-400"></i>
-                            <h2 class="text-sm font-semibold text-white uppercase tracking-wider">Cyber Attack Simulation Deck</h2>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-200">Adversary Stress-Testing Bench</span>
                         </div>
-                        <span class="text-xs font-mono px-2 py-0.5 rounded bg-rose-950/70 text-rose-400 border border-rose-800/50">Red Team Mode</span>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-800/60">Diagnostics Console</span>
                     </div>
-                    <p class="text-xs text-slate-400 mb-4">
-                        Test IDS response in real-time by launching simulated attack vectors against virtual IoT nodes.
+
+                    <p class="text-[11px] text-slate-400 mb-3 leading-relaxed">
+                        Inject controlled network attack vectors to validate IDS threshold tripwires and ML anomaly scores in real time.
                     </p>
 
-                    <!-- Target Selection -->
-                    <div class="mb-4">
-                        <label class="text-xs text-slate-300 font-medium block mb-1">Target Victim Device:</label>
-                        <select id="target-device-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
-                            <option value="DEV-001">DEV-001: Smart Thermostat (HVAC) - 192.168.1.101</option>
-                            <option value="DEV-002">DEV-002: Perimeter Security Camera - 192.168.1.102</option>
-                            <option value="DEV-003">DEV-003: Biometric Smart Lock - 192.168.1.103</option>
-                            <option value="DEV-004">DEV-004: Industrial Boiler Sensor - 192.168.1.104</option>
-                            <option value="DEV-005">DEV-005: Connected Patient Monitor - 192.168.1.105</option>
+                    <div class="mb-3">
+                        <label class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Target IoT Node:</label>
+                        <select id="target-device-select" class="w-full bg-[#0b0e14] border border-slate-700/80 rounded px-2.5 py-1.5 text-xs text-slate-200 font-mono focus:outline-none focus:border-blue-500">
+                            <option value="DEV-001">DEV-001 • Smart Thermostat (HVAC) [192.168.1.101]</option>
+                            <option value="DEV-002">DEV-002 • Perimeter Security Camera [192.168.1.102]</option>
+                            <option value="DEV-003">DEV-003 • Biometric Smart Lock [192.168.1.103]</option>
+                            <option value="DEV-004">DEV-004 • Industrial Boiler Sensor [192.168.1.104]</option>
+                            <option value="DEV-005">DEV-005 • Connected Patient Monitor [192.168.1.105]</option>
                         </select>
                     </div>
 
-                    <!-- Attack Action Buttons -->
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <button id="btn-ddos" onclick="toggleAttack('ddos')" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
-                            <span class="flex items-center gap-1.5"><i data-lucide="flame" class="w-3.5 h-3.5 text-rose-400"></i> DDoS Flood</span>
-                            <span id="badge-ddos" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
+                    <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                        <button id="btn-ddos" onclick="toggleAttack('ddos')" class="p-2.5 rounded bg-[#1b2331] hover:bg-[#232d3f] border border-slate-700 text-left transition flex justify-between items-center">
+                            <span>UDP/SYN Flood</span>
+                            <span id="badge-ddos" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
                         </button>
 
-                        <button id="btn-port_scan" onclick="toggleAttack('port_scan')" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
-                            <span class="flex items-center gap-1.5"><i data-lucide="scan" class="w-3.5 h-3.5 text-amber-400"></i> Port Scan</span>
-                            <span id="badge-port_scan" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
+                        <button id="btn-port_scan" onclick="toggleAttack('port_scan')" class="p-2.5 rounded bg-[#1b2331] hover:bg-[#232d3f] border border-slate-700 text-left transition flex justify-between items-center">
+                            <span>Port Sweep (Nmap)</span>
+                            <span id="badge-port_scan" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
                         </button>
 
-                        <button id="btn-brute_force" onclick="toggleAttack('brute_force')" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
-                            <span class="flex items-center gap-1.5"><i data-lucide="key-round" class="w-3.5 h-3.5 text-purple-400"></i> Brute Force</span>
-                            <span id="badge-brute_force" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
+                        <button id="btn-brute_force" onclick="toggleAttack('brute_force')" class="p-2.5 rounded bg-[#1b2331] hover:bg-[#232d3f] border border-slate-700 text-left transition flex justify-between items-center">
+                            <span>Auth Brute-Force</span>
+                            <span id="badge-brute_force" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
                         </button>
 
-                        <button id="btn-tampering" onclick="toggleAttack('tampering')" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
-                            <span class="flex items-center gap-1.5"><i data-lucide="shield-alert" class="w-3.5 h-3.5 text-cyan-400"></i> Data Tampering</span>
-                            <span id="badge-tampering" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
+                        <button id="btn-tampering" onclick="toggleAttack('tampering')" class="p-2.5 rounded bg-[#1b2331] hover:bg-[#232d3f] border border-slate-700 text-left transition flex justify-between items-center">
+                            <span>Payload Tamper</span>
+                            <span id="badge-tampering" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
                         </button>
 
-                        <button id="btn-c2_outbound" onclick="toggleAttack('c2_outbound')" class="col-span-2 flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
-                            <span class="flex items-center gap-1.5"><i data-lucide="radio" class="w-3.5 h-3.5 text-red-500"></i> Mirai C2 Botnet Communication</span>
-                            <span id="badge-c2_outbound" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
+                        <button id="btn-c2_outbound" onclick="toggleAttack('c2_outbound')" class="col-span-2 p-2.5 rounded bg-[#1b2331] hover:bg-[#232d3f] border border-slate-700 text-left transition flex justify-between items-center">
+                            <span>Mirai C2 Botnet Beaconing (198.51.100.99)</span>
+                            <span id="badge-c2_outbound" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
                         </button>
                     </div>
 
-                    <!-- Stop All Attacks Button -->
-                    <button onclick="stopAllAttacks()" class="w-full mt-3 py-2 px-3 rounded-lg bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/80 text-rose-300 text-xs font-bold transition flex items-center justify-center gap-2">
-                        <i data-lucide="octagon-alert" class="w-4 h-4"></i> Stop All Active Attacks
+                    <button onclick="stopAllAttacks()" class="w-full mt-2.5 py-1.5 rounded bg-red-950/40 hover:bg-red-900/60 border border-red-800 text-red-300 text-xs font-mono font-medium transition">
+                        [Reset] Terminate All Injected Vectors
                     </button>
                 </div>
 
-                <!-- Live Security Incident Feed -->
-                <div class="cyber-card p-5 rounded-xl">
-                    <div class="flex items-center justify-between mb-3">
+                <!-- SIEM Incident Event Stream -->
+                <div class="data-card rounded-lg p-4">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
                         <div class="flex items-center space-x-2">
-                            <i data-lucide="bell-ring" class="w-4 h-4 text-amber-400"></i>
-                            <h2 class="text-sm font-semibold text-white uppercase tracking-wider">IDS Incident Logs</h2>
+                            <span class="w-2 h-2 bg-amber-500 rounded-sm"></span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-200">SIEM Incident Log</span>
                         </div>
-                        <button onclick="clearAlerts()" class="text-[11px] text-slate-400 hover:text-slate-200 underline font-mono">Clear Logs</button>
+                        <button onclick="clearAlerts()" class="text-[10px] text-slate-400 hover:text-slate-200 font-mono underline">Clear Log</button>
                     </div>
 
-                    <div id="alerts-container" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
-                        <div class="text-xs text-slate-500 text-center py-6">No security incidents detected. System is running cleanly.</div>
+                    <div id="alerts-container" class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                        <div class="text-xs text-slate-500 text-center py-8 font-mono">No security incidents logged. Network nominal.</div>
                     </div>
                 </div>
 
             </div>
+
         </div>
 
     </main>
 
-    <!-- JavaScript Application Logic -->
-    <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
+    <!-- Professional Footer -->
+    <footer class="bg-[#0b0e14] border-t border-slate-800/80 px-6 py-2.5 text-[11px] font-mono text-slate-500 flex justify-between items-center">
+        <span>Host: 127.0.0.1 • Mode: Dual-Tier Rule-Based & ML Isolation Forest IDS</span>
+        <span>Status: Healthy • Buffer: 200 Evts</span>
+    </footer>
 
-        // Realtime Chart Setup
+    <script>
+        // Realtime Datadog-style Chart Setup
         const ctx = document.getElementById('trafficChart').getContext('2d');
-        const chartLabels = Array(20).fill('');
-        const trafficData = Array(20).fill(5);
-        const anomalyData = Array(20).fill(0.1);
+        const chartLabels = Array(25).fill('');
+        const trafficData = Array(25).fill(6);
+        const anomalyData = Array(25).fill(0.12);
 
         const trafficChart = new Chart(ctx, {
             type: 'line',
@@ -294,19 +309,21 @@
                     {
                         label: 'Throughput (pkts/sec)',
                         data: trafficData,
-                        borderColor: '#06b6d4',
-                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.35,
+                        borderColor: '#38bdf8',
+                        backgroundColor: 'rgba(56, 189, 248, 0.08)',
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        tension: 0.25,
                         fill: true,
                         yAxisID: 'y'
                     },
                     {
-                        label: 'Avg Anomaly Score (0-1)',
+                        label: 'ML Anomaly Score (0.0 - 1.0)',
                         data: anomalyData,
                         borderColor: '#f43f5e',
                         borderWidth: 1.5,
-                        borderDash: [4, 4],
+                        borderDash: [3, 3],
+                        pointRadius: 0,
                         tension: 0.2,
                         yAxisID: 'y1'
                     }
@@ -320,28 +337,33 @@
                     x: { display: false },
                     y: {
                         position: 'left',
-                        grid: { color: 'rgba(51, 65, 85, 0.3)' },
-                        ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } },
+                        grid: { color: 'rgba(51, 65, 85, 0.25)', drawBorder: false },
+                        ticks: { color: '#64748b', font: { family: 'IBM Plex Mono', size: 10 } },
                         min: 0,
-                        suggestedMax: 60
+                        suggestedMax: 50
                     },
                     y1: {
                         position: 'right',
                         min: 0,
                         max: 1.0,
                         grid: { display: false },
-                        ticks: { color: '#f43f5e', font: { family: 'JetBrains Mono', size: 10 } }
+                        ticks: { color: '#f43f5e', font: { family: 'IBM Plex Mono', size: 10 } }
                     }
                 },
                 plugins: {
                     legend: {
-                        labels: { color: '#cbd5e1', font: { size: 11 } }
+                        position: 'top',
+                        align: 'end',
+                        labels: { 
+                            boxWidth: 12, 
+                            color: '#94a3b8', 
+                            font: { family: 'Inter', size: 11 } 
+                        }
                     }
                 }
             }
         });
 
-        // WebSocket State Management
         let socket;
         let activeAttacks = {};
 
@@ -353,7 +375,7 @@
 
             socket.onopen = () => {
                 document.getElementById('ws-dot').className = 'w-2 h-2 rounded-full bg-emerald-500';
-                document.getElementById('ws-status').innerText = 'LIVE FEED';
+                document.getElementById('ws-status').innerText = 'LIVE SYNC';
             };
 
             socket.onmessage = (event) => {
@@ -365,7 +387,7 @@
 
             socket.onclose = () => {
                 document.getElementById('ws-dot').className = 'w-2 h-2 rounded-full bg-rose-500';
-                document.getElementById('ws-status').innerText = 'RECONNECTING...';
+                document.getElementById('ws-status').innerText = 'OFFLINE';
                 setTimeout(connectWebSocket, 2000);
             };
 
@@ -380,40 +402,39 @@
             const { metrics, devices, alerts, active_attacks } = data;
             activeAttacks = active_attacks || {};
 
-            // Update Metrics Cards
+            // Metric Cards
             document.getElementById('threat-score').innerText = metrics.threat_index_score;
             document.getElementById('threat-score-bar').style.width = `${metrics.threat_index_score}%`;
             
-            // Adjust bar colors
             const bar = document.getElementById('threat-score-bar');
             const ind = document.getElementById('threat-indicator');
             const badge = document.getElementById('threat-level-badge');
             
             badge.innerText = metrics.global_threat_level;
             if (metrics.threat_index_score > 70) {
-                bar.className = 'bg-rose-500 h-full transition-all duration-500';
-                ind.className = 'h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping';
+                bar.className = 'bg-rose-500 h-full transition-all duration-300';
+                ind.className = 'w-2 h-2 rounded-full bg-rose-500';
                 badge.className = 'text-xs font-mono font-bold text-rose-400';
             } else if (metrics.threat_index_score > 35) {
-                bar.className = 'bg-amber-500 h-full transition-all duration-500';
-                ind.className = 'h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse';
+                bar.className = 'bg-amber-500 h-full transition-all duration-300';
+                ind.className = 'w-2 h-2 rounded-full bg-amber-500';
                 badge.className = 'text-xs font-mono font-bold text-amber-400';
             } else {
-                bar.className = 'bg-emerald-500 h-full transition-all duration-500';
-                ind.className = 'h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse';
+                bar.className = 'bg-emerald-500 h-full transition-all duration-300';
+                ind.className = 'w-2 h-2 rounded-full bg-emerald-500';
                 badge.className = 'text-xs font-mono font-bold text-emerald-400';
             }
 
             document.getElementById('metric-total-pkts').innerText = metrics.total_packets_processed.toLocaleString();
             document.getElementById('metric-rate').innerText = metrics.packets_per_sec;
+            document.getElementById('metric-kbps').innerText = `${((metrics.packets_per_sec * 0.42)).toFixed(1)} KB/s`;
             document.getElementById('metric-threats').innerText = metrics.active_threats_count;
             document.getElementById('metric-quarantine').innerText = metrics.quarantined_devices_count;
 
-            // Update Chart
+            // Chart Update
             trafficData.shift();
             trafficData.push(metrics.packets_per_sec);
 
-            // Compute avg anomaly score
             let avgAnomaly = 0;
             if (devices.length > 0) {
                 avgAnomaly = devices.reduce((acc, d) => acc + (d.anomaly_score || 0), 0) / devices.length;
@@ -422,105 +443,90 @@
             anomalyData.push(avgAnomaly);
             trafficChart.update();
 
-            // Update Devices List
-            renderDevices(devices);
+            // Table update
+            renderDeviceTable(devices);
 
-            // Update Alerts
+            // Alerts update
             renderAlerts(alerts);
 
-            // Update Attack Button States
+            // Attack button sync
             updateAttackButtons(active_attacks);
         }
 
-        function renderDevices(devices) {
-            const container = document.getElementById('devices-container');
+        function renderDeviceTable(devices) {
+            const tbody = document.getElementById('devices-table-body');
             if (!devices || devices.length === 0) return;
 
             let html = '';
             devices.forEach(dev => {
                 let statusBadge = '';
-                let borderClass = 'border-slate-800';
-                let actionBtn = '';
+                let rowBg = 'hover:bg-slate-800/40';
 
                 if (dev.status === 'UNDER_ATTACK') {
-                    statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-950 text-rose-400 border border-rose-800 animate-pulse">UNDER ATTACK</span>';
-                    borderClass = 'border-rose-900/60 glow-red';
+                    statusBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-950 text-rose-300 border border-rose-800">UNDER ATTACK</span>';
+                    rowBg = 'bg-rose-950/20 hover:bg-rose-950/30';
                 } else if (dev.status === 'SUSPICIOUS') {
-                    statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950 text-amber-400 border border-amber-800">SUSPICIOUS</span>';
-                    borderClass = 'border-amber-900/50';
+                    statusBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-950 text-amber-300 border border-amber-800">SUSPICIOUS</span>';
+                    rowBg = 'bg-amber-950/15 hover:bg-amber-950/25';
                 } else if (dev.status === 'QUARANTINED') {
-                    statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-red-950 text-red-400 border border-red-700">QUARANTINED</span>';
-                    borderClass = 'border-red-900 bg-red-950/20';
+                    statusBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-950 text-red-400 border border-red-700">QUARANTINED</span>';
+                    rowBg = 'bg-red-950/30';
                 } else {
-                    statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">ONLINE</span>';
+                    statusBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-800">ONLINE</span>';
                 }
 
+                let actionBtn = '';
                 if (dev.status === 'QUARANTINED') {
-                    actionBtn = `<button onclick="toggleDeviceQuarantine('${dev.id}', false)" class="text-[11px] font-mono px-2 py-1 rounded bg-emerald-900/60 hover:bg-emerald-800 border border-emerald-700 text-emerald-200 transition">Restore</button>`;
+                    actionBtn = `<button onclick="toggleDeviceQuarantine('${dev.id}', false)" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-900/60 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 transition">Restore</button>`;
                 } else {
-                    actionBtn = `<button onclick="toggleDeviceQuarantine('${dev.id}', true)" class="text-[11px] font-mono px-2 py-1 rounded bg-slate-800 hover:bg-rose-900/60 border border-slate-700 hover:border-rose-700 text-slate-300 hover:text-rose-200 transition">Isolate</button>`;
+                    actionBtn = `<button onclick="toggleDeviceQuarantine('${dev.id}', true)" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 hover:bg-rose-900/70 text-slate-300 hover:text-rose-200 border border-slate-700 hover:border-rose-700 transition">Isolate</button>`;
                 }
 
                 const anomalyPercent = Math.min(100, Math.round(dev.anomaly_score * 100));
+                const anomalyColor = anomalyPercent > 60 ? 'text-rose-400 font-bold' : (anomalyPercent > 35 ? 'text-amber-400' : 'text-slate-400');
 
                 html += `
-                <div class="p-3 rounded-lg bg-slate-900/90 border ${borderClass} flex flex-col md:flex-row items-start md:items-center justify-between gap-3 transition">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-300 font-mono text-xs font-bold">
-                            ${dev.id.replace('DEV-', '')}
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs font-semibold text-white">${dev.name}</span>
-                                ${statusBadge}
-                            </div>
-                            <div class="text-[11px] text-slate-400 font-mono space-x-2 mt-0.5">
-                                <span>IP: ${dev.ip_address}</span>
-                                <span>•</span>
-                                <span>Proto: ${dev.protocol}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center space-x-4 self-end md:self-auto w-full md:w-auto justify-between md:justify-end">
-                        <div class="text-right">
-                            <div class="text-[11px] font-mono text-slate-300">${dev.packet_rate_sec} pkts/s</div>
-                            <div class="text-[10px] text-slate-500 font-mono">Anomaly: ${anomalyPercent}%</div>
-                        </div>
-                        <div>${actionBtn}</div>
-                    </div>
-                </div>
+                <tr class="${rowBg} transition">
+                    <td class="py-2.5 px-2.5 font-semibold text-slate-200">${dev.id}</td>
+                    <td class="py-2.5 px-2.5 font-sans font-medium text-slate-300">${dev.name}</td>
+                    <td class="py-2.5 px-2.5 text-slate-400 text-[10px]">${dev.ip_address}</td>
+                    <td class="py-2.5 px-2.5 text-slate-300 text-[10px]">${dev.protocol}</td>
+                    <td class="py-2.5 px-2.5 text-right text-slate-200">${dev.packet_rate_sec} p/s</td>
+                    <td class="py-2.5 px-2.5 text-right ${anomalyColor}">${anomalyPercent}%</td>
+                    <td class="py-2.5 px-2.5 text-center">${statusBadge}</td>
+                    <td class="py-2.5 px-2.5 text-right">${actionBtn}</td>
+                </tr>
                 `;
             });
 
-            container.innerHTML = html;
+            tbody.innerHTML = html;
         }
 
         function renderAlerts(alerts) {
             const container = document.getElementById('alerts-container');
             if (!alerts || alerts.length === 0) {
-                container.innerHTML = '<div class="text-xs text-slate-500 text-center py-6">No security incidents detected. System is running cleanly.</div>';
+                container.innerHTML = '<div class="text-xs text-slate-500 text-center py-8 font-mono">No security incidents logged. Network nominal.</div>';
                 return;
             }
 
             let html = '';
             alerts.slice(0, 15).forEach(alert => {
-                let badgeClass = 'bg-blue-950 text-blue-400 border-blue-800';
-                if (alert.severity === 'CRITICAL') badgeClass = 'bg-rose-950 text-rose-400 border-rose-800';
-                else if (alert.severity === 'HIGH') badgeClass = 'bg-amber-950 text-amber-400 border-amber-800';
-                else if (alert.severity === 'MEDIUM') badgeClass = 'bg-cyan-950 text-cyan-400 border-cyan-800';
+                let badgeClass = 'bg-blue-950 text-blue-300 border-blue-800';
+                if (alert.severity === 'CRITICAL') badgeClass = 'bg-rose-950 text-rose-300 border-rose-800';
+                else if (alert.severity === 'HIGH') badgeClass = 'bg-amber-950 text-amber-300 border-amber-800';
+                else if (alert.severity === 'MEDIUM') badgeClass = 'bg-cyan-950 text-cyan-300 border-cyan-800';
 
                 html += `
-                <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800/80 text-xs">
+                <div class="p-2.5 rounded bg-[#0b0e14] border border-slate-800 text-xs font-mono">
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex items-center space-x-2">
-                            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${badgeClass}">${alert.severity}</span>
-                            <span class="font-semibold text-slate-200">${alert.attack_type}</span>
+                            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold border ${badgeClass}">${alert.severity}</span>
+                            <span class="font-semibold text-slate-200 font-sans">${alert.attack_type}</span>
                         </div>
-                        <span class="text-[10px] font-mono text-slate-500">${alert.timestamp}</span>
+                        <span class="text-[10px] text-slate-500">${alert.timestamp}</span>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-1">${alert.description}</p>
-                    <div class="mt-1.5 pt-1.5 border-t border-slate-800/70 flex justify-between items-center text-[10px] font-mono text-slate-500">
+                    <p class="text-[11px] text-slate-400 font-sans my-1">${alert.description}</p>
+                    <div class="pt-1 border-t border-slate-800/80 flex justify-between items-center text-[10px] text-slate-500">
                         <span>Target: ${alert.device_name}</span>
                         <span class="text-emerald-400">${alert.mitigation_action}</span>
                     </div>
@@ -540,12 +546,12 @@
 
                 const isRunning = activeAttacks && activeAttacks[key];
                 if (isRunning) {
-                    btn.className = 'flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium bg-rose-950/80 border border-rose-600 text-rose-200 glow-red transition';
-                    badge.className = 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-600 text-white font-bold animate-pulse';
-                    badge.innerText = 'FIRING';
+                    btn.className = 'p-2.5 rounded bg-rose-950/70 border border-rose-600 text-left transition flex justify-between items-center text-rose-200';
+                    badge.className = 'text-[10px] px-1.5 py-0.5 rounded bg-rose-600 text-white font-bold';
+                    badge.innerText = 'ACTIVE';
                 } else {
-                    btn.className = 'flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700 transition';
-                    badge.className = 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400';
+                    btn.className = 'p-2.5 rounded bg-[#1b2331] hover:bg-[#232d3f] border border-slate-700 text-left transition flex justify-between items-center text-slate-200';
+                    badge.className = 'text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400';
                     badge.innerText = 'IDLE';
                 }
             });
@@ -554,14 +560,12 @@
         async function toggleAttack(attackType) {
             const isCurrentlyActive = activeAttacks[attackType];
             if (isCurrentlyActive) {
-                // Stop attack
                 await fetch('/api/attacks/stop', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ attack_type: attackType })
                 });
             } else {
-                // Start attack
                 const targetSelect = document.getElementById('target-device-select');
                 const targetDeviceId = targetSelect.value;
                 await fetch('/api/attacks/trigger', {
